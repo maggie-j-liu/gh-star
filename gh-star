@@ -1,0 +1,54 @@
+#!/bin/bash
+set -e
+
+usage() {
+  echo "USAGE:"
+  echo "    gh star [<username> | <username>/<repo>] [flags]"
+  echo "    Provide a username to star all the repositories of that user"
+  echo "    Specify a specific repository to star only that repository"
+  echo "FLAGS:"
+  echo "    -h, --help      Shows help information"
+  echo "    -r, --remove    Removes stars instead of adding stars"
+}
+
+input=""
+method="PUT"
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -h|--help)
+    usage
+    exit 0
+    ;;
+  -r|--remove)
+    method="DELETE"
+    ;;
+  *)
+    if [[ "$input" != "" ]]
+    then
+      echo "Unrecognized parameter $1."
+      usage
+      exit
+    fi
+    input="$1"
+    ;;
+  esac
+  shift
+done
+
+if [ -z "$input" ]
+then
+  echo "No username or repository provided."
+  usage
+  exit
+fi
+
+if [[ "$input" == *"/"* ]]
+then
+  gh api -X $method /user/starred/$input
+else
+  repos=$(gh api /users/$input/repos --jq '.[].full_name')
+  for repo in $repos
+  do
+    gh api -X $method /user/starred/$repo
+  done
+fi
