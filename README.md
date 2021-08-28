@@ -1,5 +1,5 @@
 # gh-star
-A Github CLI extension to star repos.
+A Github CLI extension for starring repos.
 
 ## Installation
 ```
